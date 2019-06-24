@@ -13,7 +13,10 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     ListView wifiListView;
     List<ScanResult> mywifiList;
     ArrayList<String> arrayList = new ArrayList<>();
+    Button Search;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +38,20 @@ public class MainActivity extends AppCompatActivity {
 
         wifiListView = findViewById(R.id.myListView);
 
+        Search = findViewById(R.id.search);
+        Search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scanWifiList();
+            }
+        });
         wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+        if (!wifiManager.isWifiEnabled()) {
+            Toast.makeText(this, "WiFi is disabled ... We need to enable it", Toast.LENGTH_LONG).show();
+            wifiManager.setWifiEnabled(true);
+        }
+
         wifiReceiver = new WifiReceiver();
 
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -60,8 +77,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void scanWifiList() {
         wifiManager.startScan();
+        Toast.makeText(this, "Scanning WiFi ...", Toast.LENGTH_SHORT).show();
         mywifiList = wifiManager.getScanResults();
 
+        Log.d("wifi1", "scanWifiList: "+wifiManager.getScanResults());
 //        Log.d("list", "man is: "+ mywifiList);
         setAdapter();
     }
@@ -83,7 +102,9 @@ public class MainActivity extends AppCompatActivity {
             for (ScanResult scanResult : mywifiList){
                 arrayList.add(scanResult.SSID);
                 listAdapter.notifyDataSetChanged();
+                Toast.makeText(context, scanResult.SSID+"\n", Toast.LENGTH_SHORT).show();
             }
+
         }
     }
 }
