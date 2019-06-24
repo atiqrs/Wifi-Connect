@@ -6,6 +6,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/wifiName"/>
+        android:id="@+id/wifiName"
+        android:textSize="25sp"
+        android:textColor="#000"/>
 
 </RelativeLayout>
