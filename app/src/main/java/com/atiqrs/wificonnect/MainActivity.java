@@ -14,14 +14,101 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    TextView mainText;
+    WifiManager mainWifi;
+    WifiReceiver receiverWifi;
+    List<ScanResult> wifiList;
+    ListView setwifiList;
+    StringBuilder sb = new StringBuilder();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mainText = (TextView) findViewById(R.id.tv1);
+        mainWifi = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                //getSystemService(Context.WIFI_SERVICE);
+
+
+//        Button search = findViewById(R.id.search);
+//        search.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mainWifi.startScan();
+//                mainText.setText("Starting Scan");
+//            }
+//        });
+
+
+        if (mainWifi.isWifiEnabled() == false)
+        {
+            // If wifi disabled then enable it
+            Toast.makeText(getApplicationContext(), "wifi is disabled..making it enabled",
+                    Toast.LENGTH_LONG).show();
+            mainWifi.setWifiEnabled(true);
+        }
+
+
+        receiverWifi = new WifiReceiver();
+        registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        mainWifi.startScan();
+        mainText.setText("Starting Scan...");
+
+    }
+
+    protected void onPause() {
+        unregisterReceiver(receiverWifi);
+        super.onPause();
+    }
+
+    protected void onResume() {
+        registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
+        super.onResume();
+    }
+
+    // Broadcast receiver class called its receive method
+    // when number of wifi connections changed
+
+    class WifiReceiver extends BroadcastReceiver {
+
+        // This method call when number of wifi connections changed
+        public void onReceive(Context c, Intent intent) {
+
+            sb = new StringBuilder();
+            wifiList = mainWifi.getScanResults();
+            sb.append("\n        Number Of Wifi connections :"+wifiList.size()+"\n\n");
+
+            for(int i = 0; i < wifiList.size(); i++){
+
+
+                String a = wifiList.get(i).SSID ;
+
+                sb.append(new Integer(i+1).toString() + ". ");
+                sb.append((wifiList.get(i).SSID)+"\n"+(wifiList.get(i).capabilities)+"\n");
+                sb.append("\n\n");
+            }
+
+            mainText.setText(sb);
+
+        }
+
+    }
+}
+
+    /*
 
     WifiManager wifiManager;
     WifiReceiver wifiReceiver;
@@ -101,10 +188,11 @@ public class MainActivity extends AppCompatActivity {
 
             for (ScanResult scanResult : mywifiList){
                 arrayList.add(scanResult.SSID);
+                Log.d("wifi1", "scanWifiList: "+scanResult.SSID);
                 listAdapter.notifyDataSetChanged();
                 Toast.makeText(context, scanResult.SSID+"\n", Toast.LENGTH_SHORT).show();
             }
 
         }
-    }
-}
+    }*/
+
